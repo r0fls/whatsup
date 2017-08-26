@@ -23,6 +23,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
 	"net/http"
 )
 
@@ -63,10 +64,12 @@ func rootRun(cmd *cobra.Command, args []string) {
 		// TODO: merge incidents if they exist? don't create a new incident each time
 		// TODO: resolve incidents if the resource comes back up
 		if err != nil || resp.StatusCode >= 400 {
+			log.Printf("Failed to reach route: %s", route)
 			event := pagerduty.Event{
 				Type:        "trigger",
 				ServiceKey:  pdkey,
 				Description: "Example event",
+				IncidentKey: route,
 			}
 			pdresp, err := pagerduty.CreateEvent(event)
 			if err != nil {
