@@ -60,8 +60,8 @@ func rootRun(cmd *cobra.Command, args []string) {
 	}
 
 	for _ = range time.Tick(duration) {
+		// TODO: this should run in a goroutine
 		resp, err = http.DefaultClient.Do(request)
-		// TODO: merge incidents if they exist? don't create a new incident each time
 		// TODO: resolve incidents if the resource comes back up
 		if err != nil || resp.StatusCode >= 400 {
 			log.Printf("Failed to reach route: %s", route)
@@ -97,6 +97,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "", "config file (default is $HOME/.whatsup.yaml)")
+	// TODO: this should take a list of routes
 	RootCmd.PersistentFlags().StringVarP(&route, "route", "r", "", "route to check, e.g. www.example.com")
 	RootCmd.PersistentFlags().StringVarP(&period, "period", "p", "", "Period of frequency.")
 	RootCmd.PersistentFlags().StringVarP(&method, "method", "m", "", "Period of frequency.")
