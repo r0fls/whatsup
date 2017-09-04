@@ -35,3 +35,7 @@ the green button. When viewing your service, click the Integrations tab. Finally
 ```
 
 The `--period` or `-p` flag defaults to 60s.
+
+## Disclaimer
+
+This could crash and hence defeat the purpose. If it were well tested, it would still be preferable to use an external service like pingdom. However, if you have access to compute resources, but not the budget for uptime monitoring, this could potentially make sense as a solution.
