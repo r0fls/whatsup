@@ -34,4 +34,4 @@ the green button. When viewing your service, click the Integrations tab. Finally
 ./whatsup -k <YOUR_SERVICE_INTEGRATION_KEY> -r http://localhost:8000 -p 30s
 ```
 
-the `--period` or `-p` flag defaults to 60s.
+The `--period` or `-p` flag defaults to 60s.
