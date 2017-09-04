@@ -31,7 +31,6 @@ var cfgFile string
 var route string
 var period string
 var method string
-var pdtoken string
 var pdkey string
 
 // RootCmd represents the base command when called without any subcommands
@@ -52,6 +51,12 @@ func rootRun(cmd *cobra.Command, args []string) {
 	var resp *http.Response
 
 	request, err := http.NewRequest(strings.ToUpper(method), route, nil)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
 	duration, err := time.ParseDuration(period)
 
 	if err != nil {
@@ -59,16 +64,18 @@ func rootRun(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	// Track triggered incidents.
+	incidents := make(map[string]bool)
+
 	for _ = range time.Tick(duration) {
 		// TODO: this should run in a goroutine
 		resp, err = http.DefaultClient.Do(request)
-		// TODO: resolve incidents if the resource comes back up
 		if err != nil || resp.StatusCode >= 400 {
 			log.Printf("Failed to reach route: %s", route)
 			event := pagerduty.Event{
 				Type:        "trigger",
 				ServiceKey:  pdkey,
-				Description: "Example event",
+				Description: route,
 				IncidentKey: route,
 			}
 			pdresp, err := pagerduty.CreateEvent(event)
@@ -76,7 +83,23 @@ func rootRun(cmd *cobra.Command, args []string) {
 				fmt.Println(pdresp)
 				fmt.Println("ERROR:", err.Error())
 			}
-
+			incidents[route] = true
+		} else {
+			// This defaults to false automatically
+			if incidents[route] {
+				// Resolve incident
+				event := pagerduty.Event{
+					Type:        "resolve",
+					ServiceKey:  pdkey,
+					IncidentKey: route,
+				}
+				pdresp, err := pagerduty.CreateEvent(event)
+				if err != nil {
+					fmt.Println(pdresp)
+					fmt.Println("ERROR:", err.Error())
+				}
+				incidents[route] = false
+			}
 		}
 	}
 }
@@ -101,13 +124,13 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&route, "route", "r", "", "route to check, e.g. www.example.com")
 	RootCmd.PersistentFlags().StringVarP(&period, "period", "p", "", "Period of frequency.")
 	RootCmd.PersistentFlags().StringVarP(&method, "method", "m", "", "Period of frequency.")
-	RootCmd.PersistentFlags().StringVarP(&pdtoken, "pdtoken", "T", "", "Period of frequency.")
 	RootCmd.PersistentFlags().StringVarP(&pdkey, "pdkey", "k", "", "Period of frequency.")
 
-	//if pdtoken == "" {
-	//	fmt.Println("Please use a damn token")
-	//	os.Exit(1)
-	//}
+	viper.BindPFlag("route", RootCmd.PersistentFlags().Lookup("route"))
+	viper.BindPFlag("period", RootCmd.PersistentFlags().Lookup("period"))
+	viper.BindPFlag("method", RootCmd.PersistentFlags().Lookup("method"))
+	viper.BindPFlag("pdkey", RootCmd.PersistentFlags().Lookup("pdkey"))
+
 	if period == "" {
 		period = "60s"
 	}
