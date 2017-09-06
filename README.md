@@ -39,3 +39,10 @@ The `--period` or `-p` flag defaults to 60s.
 ## Disclaimer
 
 This could crash and hence defeat the purpose. If it were well tested, it would still be preferable to use an external service like pingdom. However, if you have access to compute resources, but not the budget for uptime monitoring, this could potentially make sense as a solution.
+
+## Contributing
+
+Simply create an issue or a PR.
+
+#### TODO
+- [ ] support multiple routes
