@@ -85,7 +85,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 			}
 			incidents[route] = true
 		} else {
-			// This defaults to false automatically
+			// This defaults to false
 			if incidents[route] {
 				// Resolve incident
 				event := pagerduty.Event{
